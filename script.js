@@ -1033,80 +1033,113 @@ var questions = [
     url: "https://practicatest.co/static/img/co/temario/senales_transitorias/estrechamiento-mano-izquierda-transitorias.jpg",
   },
 ];
+/**
+ * Represents the index of the current question.
+ * @type {number}
+ */
+let currentQuestionIndex = 0;
 
-var currentQuestionIndex = 0;
-var correctAnswers = 0;
+/**
+ * Represents the number of correct answers.
+ * @type {number}
+ */
+let correctAnswers = 0;
 
+/**
+ * If is selectedQuestion
+ * @type {boolean}
+ */
+let isSelectedQuestion = 0;
+
+/**
+ * Loads a question onto the page.
+ * @param {number} index - The index of the question to load.
+ */
 function loadQuestion(index) {
-  var currentQuestion = questions[index];
+  const currentQuestion = questions[index];
   document.getElementById("image").src = currentQuestion.url;
   document.getElementById("description").textContent =
     currentQuestion.description;
 
-  var otherTitles = questions
+  const otherTitles = questions
     .filter((question, i) => i !== index)
-    .map((question) => question.titulo);
+    .map((question) => question.title);
 
-  var options = [];
-  options.push(currentQuestion.titulo);
-  for (var i = 0; i < 3; i++) {
-    var randomIndex = Math.floor(Math.random() * otherTitles.length);
+  let options = [currentQuestion.title];
+  for (let i = 0; i < 3; i++) {
+    const randomIndex = Math.floor(Math.random() * otherTitles.length);
     options.push(otherTitles[randomIndex]);
   }
 
   options = shuffle(options);
-  for (var i = 0; i < options.length; i++) {
-    var optionElement = document.getElementsByClassName("option")[i];
+  for (let i = 0; i < options.length; i++) {
+    const optionElement = document.getElementsByClassName("option")[i];
     optionElement.textContent = options[i];
-    if (options[i] === currentQuestion.titulo) {
+    if (options[i] === currentQuestion.title) {
       document.getElementById("options").setAttribute("data-correct-index", i);
     }
   }
 }
 
+/**
+ * Checks the selected answer against the correct one.
+ * @param {number} index - The index of the selected answer.
+ */
 function checkAnswer(index) {
-  var selectedOptionIndex = parseInt(index);
-  var correctOptionIndex = parseInt(
-    document.getElementById("options").dataset.correctIndex
-  );
+  if (!isSelectedQuestion) {
+    isSelectedQuestion = true;
+    const selectedOptionIndex = parseInt(index);
+    const correctOptionIndex = parseInt(
+      document.getElementById("options").dataset.correctIndex
+    );
 
-  if (selectedOptionIndex === correctOptionIndex) {
-    correctAnswers++;
-    $(".option")
-      .eq(selectedOptionIndex)
-      .removeClass("btn-primary")
-      .addClass("btn-success");
-  } else {
-    $(".option")
-      .eq(selectedOptionIndex)
-      .removeClass("btn-primary")
-      .addClass("btn-danger");
-    $(".option")
-      .eq(correctOptionIndex)
-      .removeClass("btn-primary")
-      .addClass("btn-success");
-  }
-  $("#next-button-container").hide();
+    if (selectedOptionIndex === correctOptionIndex) {
+      correctAnswers++;
+      $(".option")
+        .eq(selectedOptionIndex)
+        .removeClass("btn-primary")
+        .addClass("btn-success");
+    } else {
+      $(".option")
+        .eq(selectedOptionIndex)
+        .removeClass("btn-primary")
+        .addClass("btn-danger");
+      $(".option")
+        .eq(correctOptionIndex)
+        .removeClass("btn-primary")
+        .addClass("btn-success");
+    }
+    $("#next-button-container").hide();
 
-  currentQuestionIndex++;
-  if (currentQuestionIndex < questions.length) {
-    $("#next-button-container").show();
-  } else {
-    alert("Test completado. Respuestas correctas: " + correctAnswers);
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      $("#next-button-container").show();
+    } else {
+      alert("Test completed. Correct answers: " + correctAnswers);
+    }
   }
 }
 
+/**
+ * Loads the next question.
+ */
 function next() {
   $(".option").removeClass("btn-success").addClass("btn-primary");
   $(".option").removeClass("btn-danger").addClass("btn-primary");
 
   loadQuestion(currentQuestionIndex);
+  isSelectedQuestion = false;
 }
 
+/**
+ * Shuffles the elements of an array.
+ * @param {Array} array - The array to shuffle.
+ * @returns {Array} - The shuffled array.
+ */
 function shuffle(array) {
-  var currentIndex = array.length,
+  let currentIndex = array.length,
     randomIndex;
-  while (currentIndex != 0) {
+  while (currentIndex !== 0) {
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
     [array[currentIndex], array[randomIndex]] = [
@@ -1117,6 +1150,9 @@ function shuffle(array) {
   return array;
 }
 
+/**
+ * Shuffles the questions array.
+ */
 function shuffleQuestions() {
   for (let i = questions.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
