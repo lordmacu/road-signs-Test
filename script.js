@@ -1046,10 +1046,10 @@ let currentQuestionIndex = 0;
 let correctAnswers = 0;
 
 /**
- * If is selectedQuestion
+ * Indicates whether a question has been selected.
  * @type {boolean}
  */
-let isSelectedQuestion = 0;
+let isSelectedQuestion = false;
 
 /**
  * Loads a question onto the page.
@@ -1063,22 +1063,22 @@ function loadQuestion(index) {
 
   const otherTitles = questions
     .filter((question, i) => i !== index)
-    .map((question) => question.title);
+    .map((question) => question.titulo);
 
-  let options = [currentQuestion.title];
+  let options = [];
+  options.push(currentQuestion.titulo);
   for (let i = 0; i < 3; i++) {
     const randomIndex = Math.floor(Math.random() * otherTitles.length);
     options.push(otherTitles[randomIndex]);
   }
 
   options = shuffle(options);
-  for (let i = 0; i < options.length; i++) {
-    const optionElement = document.getElementsByClassName("option")[i];
-    optionElement.textContent = options[i];
-    if (options[i] === currentQuestion.title) {
+  $(".option").each(function(i, option) {
+    option.textContent = options[i];
+    if (options[i] === currentQuestion.titulo) {
       document.getElementById("options").setAttribute("data-correct-index", i);
     }
-  }
+  });
 }
 
 /**
@@ -1092,6 +1092,12 @@ function checkAnswer(index) {
     const correctOptionIndex = parseInt(
       document.getElementById("options").dataset.correctIndex
     );
+
+    $(".option").each(function(i, option) {
+      if (i !== selectedOptionIndex && i !== correctOptionIndex) {
+        $(option).addClass("disabled");
+      }
+    });
 
     if (selectedOptionIndex === correctOptionIndex) {
       correctAnswers++;
@@ -1124,11 +1130,10 @@ function checkAnswer(index) {
  * Loads the next question.
  */
 function next() {
-  $(".option").removeClass("btn-success").addClass("btn-primary");
-  $(".option").removeClass("btn-danger").addClass("btn-primary");
-
-  loadQuestion(currentQuestionIndex);
+  $(".option").removeClass("btn-success btn-danger").addClass("btn-primary");
+  $(".option").removeClass("disabled");
   isSelectedQuestion = false;
+  loadQuestion(currentQuestionIndex);
 }
 
 /**
@@ -1139,7 +1144,7 @@ function next() {
 function shuffle(array) {
   let currentIndex = array.length,
     randomIndex;
-  while (currentIndex !== 0) {
+  while (currentIndex != 0) {
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
     [array[currentIndex], array[randomIndex]] = [
